@@ -628,6 +628,8 @@
   </div>
 </div>
 
+<iframe id="submit-frame" name="submit-frame" style="display:none;" title="submit"></iframe>
+
 <script>
   // ── FADE ON SCROLL ──
   const obs = new IntersectionObserver(entries => {
@@ -661,7 +663,7 @@
   // ── INSCRIÇÃO ──
   const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzCV-vYUjvf6anEjT6XFOXof8GeafWrsVf_RyH7ODI0cNKth20ulQt9daOBVExFrqMR/exec';
 
-  async function inscrever() {
+  function inscrever() {
     const nome  = document.getElementById('f-nome').value.trim();
     const tel   = document.getElementById('f-tel').value.trim();
     const email = document.getElementById('f-email').value.trim();
@@ -679,26 +681,19 @@
     btn.textContent = '⏳ Enviando...';
     btn.disabled = true;
 
-    try {
-      await fetch(SHEETS_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, tel, email })
-      });
+    // Envia via iframe oculto — contorna CORS do Google Apps Script
+    const params = `nome=${encodeURIComponent(nome)}&tel=${encodeURIComponent(tel)}&email=${encodeURIComponent(email)}`;
+    const iframe = document.getElementById('submit-frame');
+    iframe.src = SHEETS_URL + '?' + params;
 
+    iframe.onload = function() {
       mostrarMsg('🎉 Inscrição registrada! Agora é só fazer o PIX de R$ 80,00 para a chave acima. Assim que identificarmos seu pagamento, entraremos em contato pelo WhatsApp para confirmar sua vaga. 😊', false);
-
       document.getElementById('f-nome').value  = '';
       document.getElementById('f-tel').value   = '';
       document.getElementById('f-email').value = '';
-
-    } catch(err) {
-      mostrarMsg('❌ Erro ao registrar. Tente novamente ou entre em contato pelo WhatsApp.', true);
-    } finally {
       btn.textContent = '✅ Confirmar inscrição';
       btn.disabled = false;
-    }
+    };
   }
 
   function mostrarMsg(txt, erro) {
