@@ -353,7 +353,7 @@
 
 <!-- TOPBAR -->
 <nav class="topbar">
-  <div class="topbar-brand"><span class="brand-dot"></span> Caio Zuim × Mariana Arantes</div>
+  <div class="topbar-brand"><span class="brand-dot"></span> Caio Zuim + Mariana Arantes</div>
   <button class="topbar-btn" onclick="document.getElementById('inscricao').scrollIntoView({behavior:'smooth'})">Garantir vaga</button>
 </nav>
 
@@ -548,14 +548,14 @@
       <iframe name="formsubmit-frame" style="display:none;"></iframe>
     </div>
 
-    <a href="#" class="admin-link" onclick="abrirAdmin(event)">⚙️ Área administrativa</a>
+
   </div>
 </section>
 
 <!-- ════ FOOTER ════ -->
 <footer>
   <div class="footer-inner">
-    <p class="footer-brand">Caio Zuim <span class="sep">×</span> Mariana Arantes</p>
+    <p class="footer-brand">Caio Zuim <span class="sep">+</span> Mariana Arantes</p>
     <p class="footer-info">
       Fullworking · R. Cel. José V. Vilas Bôas, 307 · Centro · Botucatu/SP<br>
       <a href="https://instagram.com/dados.tech" target="_blank">@dados.tech</a>
@@ -565,57 +565,6 @@
   </div>
 </footer>
 
-<!-- ════ ADMIN MODAL ════ -->
-<div id="admin-modal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h2 class="modal-title" id="modal-titulo">🔐 Área Administrativa</h2>
-      <button class="modal-close" onclick="fecharAdmin()">✕</button>
-    </div>
-
-    <!-- LOGIN -->
-    <div id="login-form">
-      <p style="font-size:1rem; color:var(--mid); margin-bottom:20px;">Digite a senha para acessar o painel de inscritos.</p>
-      <div class="field-group">
-        <label class="field-label">Senha</label>
-        <input id="senha-input" class="field-input" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()"/>
-      </div>
-      <p id="login-erro">❌ Senha incorreta. Tente novamente.</p>
-      <br/>
-      <button class="btn-primary" onclick="fazerLogin()" style="width:100%; justify-content:center;">Entrar</button>
-    </div>
-
-    <!-- PAINEL -->
-    <div id="admin-painel">
-      <div class="admin-stats">
-        <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total de inscritos</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-confirmados">0</div><div class="stat-label">Pagamentos confirmados</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-pendentes">0</div><div class="stat-label">Aguardando pagamento</div></div>
-      </div>
-      <div class="admin-actions">
-        <button class="btn-export" onclick="exportarCSV()">📥 Exportar CSV</button>
-        <button class="btn-logout" onclick="fazerLogout()">Sair</button>
-      </div>
-      <div class="admin-table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Nome</th>
-              <th>WhatsApp</th>
-              <th>E-mail</th>
-              <th>Data</th>
-              <th>Status</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="admin-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
 <iframe id="submit-frame" name="submit-frame" style="display:none;" title="submit"></iframe>
 
 <script>
@@ -624,20 +573,6 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); obs.unobserve(e.target); }});
   }, { threshold: 0.07 });
   document.querySelectorAll('.fade').forEach(el => obs.observe(el));
-
-  // ── STORAGE HELPERS ──
-  const STORE_KEY = 'presenca_digital_inscritos';
-
-  async function getInscritos() {
-    try {
-      const r = await window.storage.get(STORE_KEY);
-      return r ? JSON.parse(r.value) : [];
-    } catch { return []; }
-  }
-
-  async function saveInscritos(lista) {
-    await window.storage.set(STORE_KEY, JSON.stringify(lista));
-  }
 
   // ── PIX COPY ──
   function copyPix(el) {
@@ -719,120 +654,9 @@
     el.textContent = txt;
     el.className = 'form-msg' + (erro ? ' erro' : '');
     el.style.display = 'block';
-    if (!erro) setTimeout(() => el.style.display = 'none', 8000);
+    if (!erro) setTimeout(() => el.style.display = 'none', 30000);
   }
 
-  // ── ADMIN ──
-  const SENHA = 'dados2026';
-  let logado = false;
-
-  function abrirAdmin(e) {
-    e.preventDefault();
-    document.getElementById('admin-modal').classList.add('open');
-    if (!logado) {
-      document.getElementById('login-form').style.display = 'block';
-      document.getElementById('admin-painel').style.display = 'none';
-    } else {
-      mostrarPainel();
-    }
-  }
-
-  function fecharAdmin() {
-    document.getElementById('admin-modal').classList.remove('open');
-  }
-
-  function fazerLogin() {
-    const v = document.getElementById('senha-input').value;
-    if (v === SENHA) {
-      logado = true;
-      document.getElementById('login-erro').style.display = 'none';
-      mostrarPainel();
-    } else {
-      document.getElementById('login-erro').style.display = 'block';
-    }
-  }
-
-  function fazerLogout() {
-    logado = false;
-    document.getElementById('senha-input').value = '';
-    document.getElementById('login-form').style.display = 'block';
-    document.getElementById('admin-painel').style.display = 'none';
-    document.getElementById('modal-titulo').textContent = '🔐 Área Administrativa';
-  }
-
-  async function mostrarPainel() {
-    document.getElementById('login-form').style.display = 'none';
-    document.getElementById('admin-painel').style.display = 'block';
-    document.getElementById('modal-titulo').textContent = '📋 Inscritos — Presença Digital';
-    await renderTabela();
-  }
-
-  async function renderTabela() {
-    const inscritos = await getInscritos();
-    const confirmados = inscritos.filter(i => i.status === 'confirmado').length;
-    const pendentes   = inscritos.filter(i => i.status === 'pendente').length;
-    document.getElementById('stat-total').textContent = inscritos.length;
-    document.getElementById('stat-confirmados').textContent = confirmados;
-    document.getElementById('stat-pendentes').textContent = pendentes;
-
-    const tbody = document.getElementById('admin-tbody');
-    if (inscritos.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Nenhum inscrito ainda.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = inscritos.map((ins, i) => `
-      <tr>
-        <td style="color:var(--muted);font-size:0.82rem;">${i+1}</td>
-        <td><strong>${ins.nome}</strong></td>
-        <td>${ins.tel}</td>
-        <td style="font-size:0.88rem;">${ins.email}</td>
-        <td style="font-size:0.82rem;color:var(--muted);">${ins.data}</td>
-        <td><span class="status-badge ${ins.status === 'confirmado' ? 'status-confirmado' : 'status-pendente'}">${ins.status === 'confirmado' ? '✅ Confirmado' : '⏳ Pendente'}</span></td>
-        <td>
-          ${ins.status !== 'confirmado' ? `<button class="btn-confirmar" onclick="confirmarPagamento(${ins.id})">✅ Confirmar</button>` : ''}
-          <button class="btn-excluir" onclick="excluirInscrito(${ins.id})">🗑️</button>
-        </td>
-      </tr>
-    `).join('');
-  }
-
-  async function confirmarPagamento(id) {
-    const inscritos = await getInscritos();
-    const ins = inscritos.find(i => i.id === id);
-    if (!ins) return;
-    ins.status = 'confirmado';
-    await saveInscritos(inscritos);
-    // Abre WhatsApp com mensagem de confirmação
-    const msg = encodeURIComponent(`Olá, ${ins.nome}! 🎉\n\nRecebi seu pagamento e sua inscrição no evento *Presença Digital* (13/06) está confirmada!\n\nFico te esperando no Fullworking às 14h. 😊\n\n— Caio Zuim`);
-    window.open(`https://wa.me/55${ins.tel.replace(/\D/g,'')}?text=${msg}`, '_blank');
-    await renderTabela();
-  }
-
-  async function excluirInscrito(id) {
-    if (!confirm('Confirma exclusão deste inscrito?')) return;
-    const inscritos = await getInscritos();
-    await saveInscritos(inscritos.filter(i => i.id !== id));
-    await renderTabela();
-  }
-
-  async function exportarCSV() {
-    const inscritos = await getInscritos();
-    if (inscritos.length === 0) { alert('Nenhum inscrito para exportar.'); return; }
-    const header = ['#','Nome','WhatsApp','Email','Data','Status'];
-    const rows = inscritos.map((ins,i) => [i+1, ins.nome, ins.tel, ins.email, ins.data, ins.status]);
-    const csv = [header, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
-    const blob = new Blob([csv], {type:'text/csv'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'inscritos-presenca-digital.csv';
-    a.click();
-  }
-
-  // Fechar modal clicando fora
-  document.getElementById('admin-modal').addEventListener('click', function(e) {
-    if (e.target === this) fecharAdmin();
-  });
 </script>
 </body>
 </html>
