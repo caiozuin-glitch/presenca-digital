@@ -246,7 +246,7 @@
     .pix-label { font-size: 0.78rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
     .pix-numero { font-size: 1.05rem; font-weight: 700; color: var(--text); }
 
-    .form-msg { display: none; background: #ECFDF5; border: 2px solid #6EE7B7; border-radius: 10px; padding: 18px 20px; font-size: 1rem; font-weight: 600; color: #065F46; margin-bottom: 16px; text-align: center; }
+    .form-msg { display: none; background: #ECFDF5; border: 2px solid #6EE7B7; border-radius: 10px; padding: 18px 20px; font-size: 1rem; font-weight: 600; color: #065F46; margin-top: 16px; text-align: center; }
     .form-msg.erro { background: #FEF2F2; border-color: #FECACA; color: #991B1B; }
 
     /* ── PREÇO ── */
@@ -506,9 +506,11 @@
         <li><span class="inclui-icon">✅</span> Acesso ao grupo pós-evento</li>
       </ul>
 
-      <div id="form-msg" class="form-msg"></div>
+      <button class="btn-primary" onclick="inscrever()" style="width:100%; justify-content:center; font-size:1.1rem; padding:18px;">
+        ✅ Confirmar inscrição
+      </button>
 
-      <div class="form-fields">
+      <div id="form-msg" class="form-msg"></div>
         <div class="field-group">
           <label class="field-label">👤 Seu nome completo</label>
           <input id="f-nome" class="field-input" type="text" placeholder="Ex: Maria Silva" autocomplete="name"/>
@@ -530,10 +532,6 @@
         </div>
         <span style="font-size:1.4rem;">📋</span>
       </div>
-
-      <button class="btn-primary" onclick="inscrever()" style="width:100%; justify-content:center; font-size:1.1rem; padding:18px;">
-        ✅ Confirmar inscrição
-      </button>
 
       <!-- Web3Forms hidden form -->
       <form id="formsubmit-form" style="display:none;">
@@ -696,17 +694,22 @@
         document.getElementById('f-nome').value  = '';
         document.getElementById('f-tel').value   = '';
         document.getElementById('f-email').value = '';
+        btn.textContent = '⏳ Aguardando seu PIX...';
+        btn.disabled = true;
+        btn.style.background = '#6B7280';
+        btn.style.cursor = 'default';
       } else {
         mostrarMsg('❌ Erro ao registrar. Tente novamente ou entre em contato pelo WhatsApp.', true);
+        btn.textContent = '✅ Confirmar inscrição';
+        btn.disabled = false;
       }
     })
     .catch(() => {
       mostrarMsg('❌ Erro ao registrar. Tente novamente ou entre em contato pelo WhatsApp.', true);
-    })
-    .finally(() => {
       btn.textContent = '✅ Confirmar inscrição';
       btn.disabled = false;
-    });
+    })
+    .finally(() => {});
   }
 
   function mostrarMsg(txt, erro) {
