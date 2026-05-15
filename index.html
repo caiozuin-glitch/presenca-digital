@@ -506,11 +506,7 @@
         <li><span class="inclui-icon">✅</span> Acesso ao grupo pós-evento</li>
       </ul>
 
-      <button class="btn-primary" onclick="inscrever()" style="width:100%; justify-content:center; font-size:1.1rem; padding:18px;">
-        ✅ Confirmar inscrição
-      </button>
-
-      <div id="form-msg" class="form-msg"></div>
+      <div class="form-fields">
         <div class="field-group">
           <label class="field-label">👤 Seu nome completo</label>
           <input id="f-nome" class="field-input" type="text" placeholder="Ex: Maria Silva" autocomplete="name"/>
@@ -532,6 +528,12 @@
         </div>
         <span style="font-size:1.4rem;">📋</span>
       </div>
+
+      <button class="btn-primary" onclick="inscrever()" style="width:100%; justify-content:center; font-size:1.1rem; padding:18px;">
+        ✅ Confirmar inscrição
+      </button>
+
+      <div id="form-msg" class="form-msg"></div>
 
       <!-- Web3Forms hidden form -->
       <form id="formsubmit-form" style="display:none;">
