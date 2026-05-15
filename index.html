@@ -659,11 +659,12 @@
   }
 
   // ── INSCRIÇÃO ──
+  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzCV-vYUjvf6anEjT6XFOXof8GeafWrsVf_RyH7ODI0cNKth20ulQt9daOBVExFrqMR/exec';
+
   async function inscrever() {
-    const nome = document.getElementById('f-nome').value.trim();
-    const tel  = document.getElementById('f-tel').value.trim();
-    const email= document.getElementById('f-email').value.trim();
-    const msg  = document.getElementById('form-msg');
+    const nome  = document.getElementById('f-nome').value.trim();
+    const tel   = document.getElementById('f-tel').value.trim();
+    const email = document.getElementById('f-email').value.trim();
 
     if (!nome || !tel || !email) {
       mostrarMsg('⚠️ Preencha todos os campos antes de continuar.', true);
@@ -674,28 +675,30 @@
       return;
     }
 
-    const inscritos = await getInscritos();
-    const jaExiste = inscritos.find(i => i.email.toLowerCase() === email.toLowerCase() || i.tel === tel);
-    if (jaExiste) {
-      mostrarMsg('⚠️ Já existe uma inscrição com esse e-mail ou telefone.', true);
-      return;
+    const btn = document.querySelector('button[onclick="inscrever()"]');
+    btn.textContent = '⏳ Enviando...';
+    btn.disabled = true;
+
+    try {
+      await fetch(SHEETS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, tel, email })
+      });
+
+      mostrarMsg('🎉 Inscrição registrada! Agora é só fazer o PIX de R$ 80,00 para a chave acima. Assim que identificarmos seu pagamento, entraremos em contato pelo WhatsApp para confirmar sua vaga. 😊', false);
+
+      document.getElementById('f-nome').value  = '';
+      document.getElementById('f-tel').value   = '';
+      document.getElementById('f-email').value = '';
+
+    } catch(err) {
+      mostrarMsg('❌ Erro ao registrar. Tente novamente ou entre em contato pelo WhatsApp.', true);
+    } finally {
+      btn.textContent = '✅ Confirmar inscrição';
+      btn.disabled = false;
     }
-
-    const novo = {
-      id: Date.now(),
-      nome, tel, email,
-      data: new Date().toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}),
-      status: 'pendente'
-    };
-
-    inscritos.push(novo);
-    await saveInscritos(inscritos);
-
-    mostrarMsg('🎉 Inscrição registrada! Agora é só fazer o PIX de R$ 80,00 para a chave acima. Assim que identificarmos seu pagamento, entraremos em contato pelo WhatsApp para confirmar sua vaga. 😊', false);
-
-    document.getElementById('f-nome').value = '';
-    document.getElementById('f-tel').value  = '';
-    document.getElementById('f-email').value= '';
   }
 
   function mostrarMsg(txt, erro) {
