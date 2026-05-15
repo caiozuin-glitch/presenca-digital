@@ -558,6 +558,19 @@
       <button class="btn-primary" onclick="inscrever()" style="width:100%; justify-content:center; font-size:1.1rem; padding:18px;">
         ✅ Confirmar inscrição
       </button>
+
+      <!-- FormSubmit hidden form -->
+      <form id="formsubmit-form" action="https://formsubmit.co/caio.zuin@gmail.com" method="POST" target="formsubmit-frame" style="display:none;">
+        <input type="hidden" name="_subject" value="🎉 Nova inscrição — Presença Digital"/>
+        <input type="hidden" name="_captcha" value="false"/>
+        <input type="hidden" name="_template" value="table"/>
+        <input type="hidden" name="_next" value="https://palestrapresencadigital.vercel.app/"/>
+        <input type="text"   name="Nome"      id="fs-nome"/>
+        <input type="text"   name="WhatsApp"  id="fs-tel"/>
+        <input type="email"  name="Email"     id="fs-email"/>
+        <input type="hidden" name="Confirmacao_WA" id="fs-wa"/>
+      </form>
+      <iframe name="formsubmit-frame" style="display:none;"></iframe>
     </div>
 
     <a href="#" class="admin-link" onclick="abrirAdmin(event)">⚙️ Área administrativa</a>
@@ -661,8 +674,6 @@
   }
 
   // ── INSCRIÇÃO ──
-  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzCV-vYUjvf6anEjT6XFOXof8GeafWrsVf_RyH7ODI0cNKth20ulQt9daOBVExFrqMR/exec';
-
   function inscrever() {
     const nome  = document.getElementById('f-nome').value.trim();
     const tel   = document.getElementById('f-tel').value.trim();
@@ -681,32 +692,32 @@
     btn.textContent = '⏳ Enviando...';
     btn.disabled = true;
 
-    // JSONP — único método que funciona com Google Apps Script sem CORS
-    const callbackName = 'cb_' + Date.now();
-    const script = document.createElement('script');
+    // Monta link do WhatsApp com mensagem pronta
+    const telLimpo = '55' + tel.replace(/\D/g, '');
+    const msgWA = encodeURIComponent(
+      `Olá, ${nome}! 🎉\n\nRecebi seu pagamento e sua inscrição no evento *Presença Digital* (13/06) está confirmada!\n\nTe espero no Fullworking (R. Cel. José V. Vilas Bôas, 307 - Centro) às 14h. 😊\n\n— Caio Zuim`
+    );
+    const linkWA = `https://wa.me/${telLimpo}?text=${msgWA}`;
 
-    window[callbackName] = function(response) {
-      delete window[callbackName];
-      document.body.removeChild(script);
+    // Preenche o form oculto do FormSubmit
+    document.getElementById('fs-nome').value  = nome;
+    document.getElementById('fs-tel').value   = tel;
+    document.getElementById('fs-email').value = email;
+    document.getElementById('fs-wa').value    = linkWA;
+
+    // Envia via iframe — sem redirecionar a página
+    const frame = document.querySelector('iframe[name="formsubmit-frame"]');
+    frame.onload = function() {
       mostrarMsg('🎉 Inscrição registrada! Agora é só fazer o PIX de R$ 80,00 para a chave acima. Assim que identificarmos seu pagamento, entraremos em contato pelo WhatsApp para confirmar sua vaga. 😊', false);
       document.getElementById('f-nome').value  = '';
       document.getElementById('f-tel').value   = '';
       document.getElementById('f-email').value = '';
       btn.textContent = '✅ Confirmar inscrição';
       btn.disabled = false;
+      frame.onload = null;
     };
 
-    script.onerror = function() {
-      delete window[callbackName];
-      document.body.removeChild(script);
-      mostrarMsg('❌ Erro ao registrar. Tente novamente ou entre em contato pelo WhatsApp.', true);
-      btn.textContent = '✅ Confirmar inscrição';
-      btn.disabled = false;
-    };
-
-    const params = `nome=${encodeURIComponent(nome)}&tel=${encodeURIComponent(tel)}&email=${encodeURIComponent(email)}&callback=${callbackName}`;
-    script.src = SHEETS_URL + '?' + params;
-    document.body.appendChild(script);
+    document.getElementById('formsubmit-form').submit();
   }
 
   function mostrarMsg(txt, erro) {
