@@ -681,12 +681,13 @@
     btn.textContent = '⏳ Enviando...';
     btn.disabled = true;
 
-    // Envia via iframe oculto — contorna CORS do Google Apps Script
-    const params = `nome=${encodeURIComponent(nome)}&tel=${encodeURIComponent(tel)}&email=${encodeURIComponent(email)}`;
-    const iframe = document.getElementById('submit-frame');
-    iframe.src = SHEETS_URL + '?' + params;
+    // JSONP — único método que funciona com Google Apps Script sem CORS
+    const callbackName = 'cb_' + Date.now();
+    const script = document.createElement('script');
 
-    iframe.onload = function() {
+    window[callbackName] = function(response) {
+      delete window[callbackName];
+      document.body.removeChild(script);
       mostrarMsg('🎉 Inscrição registrada! Agora é só fazer o PIX de R$ 80,00 para a chave acima. Assim que identificarmos seu pagamento, entraremos em contato pelo WhatsApp para confirmar sua vaga. 😊', false);
       document.getElementById('f-nome').value  = '';
       document.getElementById('f-tel').value   = '';
@@ -694,6 +695,18 @@
       btn.textContent = '✅ Confirmar inscrição';
       btn.disabled = false;
     };
+
+    script.onerror = function() {
+      delete window[callbackName];
+      document.body.removeChild(script);
+      mostrarMsg('❌ Erro ao registrar. Tente novamente ou entre em contato pelo WhatsApp.', true);
+      btn.textContent = '✅ Confirmar inscrição';
+      btn.disabled = false;
+    };
+
+    const params = `nome=${encodeURIComponent(nome)}&tel=${encodeURIComponent(tel)}&email=${encodeURIComponent(email)}&callback=${callbackName}`;
+    script.src = SHEETS_URL + '?' + params;
+    document.body.appendChild(script);
   }
 
   function mostrarMsg(txt, erro) {
